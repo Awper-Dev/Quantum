@@ -33,9 +33,9 @@ fn main() {
 fn setup_listener() {
     let listener = TcpListener::bind("127.0.0.1:6969").unwrap();
 
-    while true {
+    loop {
         for stream in listener.incoming() {
-            let mut stream = stream.unwrap();
+            let stream = stream.unwrap();
             handle_connection(stream);
         }
     }
@@ -47,6 +47,8 @@ fn handle_connection(mut stream: TcpStream) {
 
     stream.read(&mut buffer).unwrap();
 
+    println!("Handled connection");
+
     let mut buffer = DataBuffer::from(buffer);
 
     let mut size = 0;
@@ -55,7 +57,7 @@ fn handle_connection(mut stream: TcpStream) {
     size = read_var_int(&mut buffer);
     packet_id = read_var_int(&mut buffer);
 
-    if (size == 0) {
+    if size == 0 {
         println!("Something went wrong while reading the packet.");
         return;
     }
@@ -90,7 +92,7 @@ fn read_var_int(buffer: &mut DataBuffer) -> i32 {
         value |= ((current_byte as u32 & 0x7F) << (length * 7)) as i32; // other method without casting?
 
         length += 1;
-        if (length > 5) {
+        if length > 5 {
             println!("VarInt too big!");
             return 0;
         }

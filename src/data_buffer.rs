@@ -16,6 +16,15 @@ impl DataBuffer {
         }
     }
 
+    pub fn new() -> DataBuffer {
+        let buffer: [u8; 4048] = [0; 4048];
+        DataBuffer {
+            buffer,
+            next_read: 0,
+            next_write: 0
+        }
+    }
+
     pub fn has_next(&self) -> bool {
         self.next_read < self.buffer.len()
     }
@@ -106,6 +115,8 @@ impl DataBuffer {
 
     pub fn write_string(&mut self, value: String) {
         let bytes = value.into_bytes();
+
+        println!("Writing string of size: {}", bytes.len());
 
         // String length
         self.write_var_int(&mut (bytes.len() as i32));

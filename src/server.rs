@@ -15,7 +15,7 @@ pub fn setup_listener() {
     }
 }
 
-fn handle_connection(mut stream: &TcpStream) {
+fn handle_connection(mut stream: &TcpStream) -> () {
     // Byte Array
     loop {
         let mut buffer: [u8; 4048] = [0; 4048];
@@ -39,6 +39,16 @@ fn handle_connection(mut stream: &TcpStream) {
         // DEBUG INFO
         //println!("size is {}, sum is {}, bytes_read is {}", size, size_size + size as u32, bytes_read);
 
-        handle_packet((size as i32) - id_size, packet_id as i32, &mut buffer);
+        let response_option = handle_packet((size as i32) - id_size, packet_id as i32, &mut buffer);
+
+        match response_option {
+            Some(data_buffer) => {
+                stream.write(&data_buffer.buffer).unwrap();
+                stream.flush();
+            },
+            None => {}
+        };
+
+        println!("done!");
     }
 }

@@ -9,7 +9,7 @@ A lightweight, multi-threaded minecraft server implementation made for education
 
 ---
 
-- [ ] Make sure we actually make the write response call
+- [x] Make sure we actually make the write response call
 - [ ] Save handshaking state per connection (HashMap?)
 - [ ] Add Ping handler (ID 0x01)
 - [ ] Add Pong response

@@ -43,11 +43,13 @@ fn handle_connection(mut stream: &TcpStream) -> () {
 
         match response_option {
             Some(data_buffer) => {
-                stream.write(&data_buffer.buffer).unwrap();
+                stream.write_all(&data_buffer.buffer).unwrap();
                 stream.flush();
             },
             None => {}
         };
+
+        //stream.shutdown(Shutdown::Both);
 
         println!("done!");
     }

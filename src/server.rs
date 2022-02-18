@@ -5,7 +5,7 @@ use crate::data_buffer::DataBuffer;
 use crate::packet::handle_packet;
 
 pub fn setup_listener() {
-    let listener = TcpListener::bind("127.0.0.1:6969").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:25565").unwrap();
 
     loop {
         for stream in listener.incoming() {

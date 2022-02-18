@@ -2,13 +2,13 @@ use std::str;
 
 /* Byte Array Wrapper */
 pub struct DataBuffer {
-    pub buffer: [u8; 4048], // Internal byte array
+    pub buffer: Vec<u8>, // Internal byte array
     next_read: usize, // Next index to read on
     next_write: usize
 }
 
 impl DataBuffer {
-    pub fn from(buffer: [u8; 4048]) -> DataBuffer {
+    pub fn from(buffer: Vec<u8>) -> DataBuffer {
         DataBuffer {
             buffer,
             next_read: 0,
@@ -17,9 +17,8 @@ impl DataBuffer {
     }
 
     pub fn new() -> DataBuffer {
-        let buffer: [u8; 4048] = [0; 4048];
         DataBuffer {
-            buffer,
+            buffer: Vec::new(),
             next_read: 0,
             next_write: 0
         }
@@ -52,7 +51,7 @@ impl DataBuffer {
 
         let mut unicode_vector = Vec::new();
 
-        for i in 0..string_size {
+        for _i in 0..string_size {
             unicode_vector.push(self.next());
         }
 
@@ -72,7 +71,7 @@ impl DataBuffer {
     // var int is ALWAYS i32
     pub fn read_var_int(&mut self, value: &mut i32) -> u32 {
         let mut length = 0;
-        let mut current_byte: u8 = 0;
+        let mut current_byte: u8;
 
         for _i in 0..6 {
             if !self.has_next() {
@@ -80,7 +79,7 @@ impl DataBuffer {
             }
 
             current_byte = self.next();
-            *value |= ((current_byte as i32 & 0x7F) << (length * 7)); // other method without casting?
+            *value |= (current_byte as i32 & 0x7F) << (length * 7); // other method without casting?
 
             length += 1;
             if length > 5 {
@@ -96,34 +95,36 @@ impl DataBuffer {
         length
     }
 
-    fn write_byte(&mut self, value: &u8) {
-        self.buffer[self.next_write] = *value;
+    fn write_byte(&mut self, value: u8) {
+        self.buffer.push(value);
+        //self.buffer[self.next_write] = *value;
         self.next_write += 1;
     }
 
-    pub fn write_var_int(&mut self, value: &mut i32) {
+    pub fn write_var_int(&mut self, mut value: i32) {
         loop {
-            if (*value & !0x7F) == 0 {
-                self.write_byte(&(*value as u8));
+            if (value & !0x7F) == 0 {
+                self.write_byte(value as u8);
                 return;
             }
 
-            self.write_byte(&((*value as u8 & 0x7F) | 0x80));
-            *value >>= 7;
+            self.write_byte((value as u8 & 0x7F) | 0x80);
+            value >>= 7;
         }
     }
 
+    #[allow(dead_code)]
     pub fn write_string(&mut self, value: String) {
         let bytes = value.into_bytes();
 
         println!("Writing string of size: {}", bytes.len());
 
         // String length
-        self.write_var_int(&mut (bytes.len() as i32));
+        self.write_var_int(bytes.len() as i32);
 
         // Write actual string
         for byte in bytes {
-            self.write_byte(&byte);
+            self.write_byte(byte);
         }
     }
 }
